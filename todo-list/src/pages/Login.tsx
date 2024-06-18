@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { ChangeEvent, useState } from "react";
+import axios from "axios";
 
 function Login() {
   const [id, setId] = useState<string>("");
@@ -10,16 +11,33 @@ function Login() {
   const onChangeId = (e: ChangeEvent<HTMLInputElement>) => {
     setId(e.target.value);
   };
+
   const onChangePw = (e: ChangeEvent<HTMLInputElement>) => {
     setPw(e.target.value);
   };
 
-  const handleLoginClick = () => {
-    navigate("/Calendar");
+  const handleLoginClick = async () => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/users/login`,
+        {
+          username: id,
+          password: pw,
+        }
+      );
+      if (response.status === 200) {
+        const userId = response.data.user_id; // Assuming the response contains the user's ID
+        alert(`로그인 성공! 사용자 ID: ${userId}`);
+        navigate(`/Date/${userId}`);
+      }
+    } catch (error) {
+      alert("로그인에 실패했습니다. 다시 시도해주세요.");
+      console.error("There was an error!", error);
+    }
   };
 
   const handleSignupClick = () => {
-    navigate("/Signup");
+    navigate("/signup");
   };
 
   return (
@@ -34,7 +52,7 @@ function Login() {
           </InputContainer>
           <InputContainer>
             <IdPwTitle>PW</IdPwTitle>
-            <InputBox value={pw} onChange={onChangePw} />
+            <InputBox type="password" value={pw} onChange={onChangePw} />
           </InputContainer>
         </InputSection>
         <BtnSection>

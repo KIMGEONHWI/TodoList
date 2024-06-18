@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 import Login from "./pages/Login";
-import Calendar from "./pages/Date";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
+import Date from "./pages/Date";
 
 export const router = createBrowserRouter([
   {
@@ -10,15 +10,11 @@ export const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/login",
-    element: <Login />,
+    path: "/Date/:uerId",
+    element: <Date />,
   },
   {
-    path: "/Calendar",
-    element: <Calendar />,
-  },
-  {
-    path: "/Home/:memberId",
+    path: "/Home/:userId",
     element: <Home />,
   },
   {
