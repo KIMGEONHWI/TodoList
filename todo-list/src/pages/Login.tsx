@@ -18,6 +18,10 @@ function Login() {
     navigate("/Calendar");
   };
 
+  const handleSignupClick = () => {
+    navigate("/Signup");
+  };
+
   return (
     <LoginPageContainer>
       <LoginBoxContainer>
@@ -35,6 +39,7 @@ function Login() {
         </InputSection>
         <BtnSection>
           <Button onClick={handleLoginClick}>로그인</Button>
+          <Button onClick={handleSignupClick}>회원가입</Button>
         </BtnSection>
       </LoginBoxContainer>
     </LoginPageContainer>

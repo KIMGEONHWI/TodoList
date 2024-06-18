@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Login from "./pages/Login";
 import Calendar from "./pages/Date";
 import Home from "./pages/Home";
+import Signup from "./pages/Signup";
 
 export const router = createBrowserRouter([
   {
@@ -17,7 +18,11 @@ export const router = createBrowserRouter([
     element: <Home />,
   },
   {
-    path: "/Home/:date", // 날짜를 파라미터로 받는 Note 경로 추가
+    path: "/Home/:date",
     element: <Home />,
+  },
+  {
+    path: "/Signup",
+    element: <Signup />,
   },
 ]);
