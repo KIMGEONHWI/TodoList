@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
+import axios from "axios";
 
 function SignUp() {
   const [id, setId] = useState("");
@@ -28,12 +29,25 @@ function SignUp() {
     return isValid;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    // Here you can add any logic you want to handle after the form validation is successful
-    alert("회원가입 버튼이 클릭되었습니다.");
-    navigate("/");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/users/register`,
+        {
+          username: id,
+          password: pw,
+        }
+      );
+      if (response.status === 200) {
+        alert(response.data.detail); // Show success message from the response
+        navigate("/");
+      }
+    } catch (error) {
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+      console.error("There was an error!", error);
+    }
   };
 
   const handleBackClick = () => {
