@@ -1,28 +1,57 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { NoteType } from "../../hooks/useNotes";
+import axios from "axios";
+import { useParams } from "react-router-dom";
 
 interface NoteInputProps {
-  addNote: (note: Omit<NoteType, "id" | "date">) => void;
+  addNote: (note: NoteType) => void;
   onCancel: () => void;
 }
 
 const NoteInput = ({ addNote, onCancel }: NoteInputProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const { userId } = useParams<{ userId: string }>();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const now = new Date();
-    addNote({
-      title,
-      content,
-      createdAt: now,
-      updatedAt: now,
-      bookmarked: false,
-    });
-    setTitle("");
-    setContent("");
+    const now = new Date().toISOString();
+
+    try {
+      console.log(
+        "Sending request to:",
+        `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`
+      );
+      console.log("Request data:", { date: now, content });
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`,
+        {
+          date: now,
+          content: content,
+        }
+      );
+
+      console.log("Response data:", response.data);
+
+      if (response.status === 200) {
+        const newNote: NoteType = {
+          id: response.data.todo_id,
+          title: title,
+          content: response.data.content,
+          createdAt: new Date(response.data.date),
+          updatedAt: new Date(response.data.date),
+          bookmarked: false,
+          date: response.data.date,
+        };
+        addNote(newNote);
+        setTitle("");
+        setContent("");
+      }
+    } catch (error) {
+      console.error("To-do 생성 실패", error);
+    }
   };
 
   return (

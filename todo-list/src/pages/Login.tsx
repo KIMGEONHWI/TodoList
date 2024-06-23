@@ -26,7 +26,7 @@ function Login() {
         }
       );
       if (response.status === 200) {
-        const userId = response.data.user_id; // Assuming the response contains the user's ID
+        const userId = response.data.user_id;
         alert(`로그인 성공! 사용자 ID: ${userId}`);
         navigate(`/Date/${userId}`);
       }

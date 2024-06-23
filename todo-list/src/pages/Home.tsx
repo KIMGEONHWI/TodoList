@@ -112,7 +112,6 @@ const HomeContainer = styled.div`
   padding: 2rem;
   position: relative;
 `;
-
 const HomeHeader = styled.div`
   display: flex;
   justify-content: center;

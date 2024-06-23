@@ -41,7 +41,7 @@ function SignUp() {
         }
       );
       if (response.status === 200) {
-        alert(response.data.detail); // Show success message from the response
+        alert(response.data.detail);
         navigate("/");
       }
     } catch (error) {
