@@ -7,37 +7,53 @@ import { useParams } from "react-router-dom";
 interface NoteInputProps {
   addNote: (note: NoteType) => void;
   onCancel: () => void;
+  setNotes: React.Dispatch<React.SetStateAction<NoteType[]>>;
 }
 
-const NoteInput = ({ addNote, onCancel }: NoteInputProps) => {
+interface TodoResponse {
+  todo_id: number;
+  user: string;
+  date: string;
+  content: string;
+  is_checked: boolean;
+  emoji: string;
+}
+
+const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const { userId } = useParams<{ userId: string }>();
+  const { userId, date } = useParams<{ userId: string; date: string }>();
+
+  console.log("Base URL:", import.meta.env.VITE_BASE_URL);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const now = new Date().toISOString();
+    const now = new Date();
+    const utcDate = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
+    const formattedDate = utcDate.toISOString().split("T")[0];
+
+    if (!userId) {
+      console.error("User ID is missing");
+      return;
+    }
+
+    const url = `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`;
+    console.log("Sending POST request to:", url);
+    console.log("Request data:", { date: formattedDate, content });
 
     try {
-      console.log(
-        "Sending request to:",
-        `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`
-      );
-      console.log("Request data:", { date: now, content });
+      const response = await axios.post<TodoResponse>(url, {
+        date: formattedDate,
+        content: content,
+      });
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`,
-        {
-          date: now,
-          content: content,
-        }
-      );
-
-      console.log("Response data:", response.data);
+      console.log("POST Response data:", response.data);
 
       if (response.status === 200) {
         const newNote: NoteType = {
-          id: response.data.todo_id,
+          id: response.data.todo_id.toString(),
           title: title,
           content: response.data.content,
           createdAt: new Date(response.data.date),
@@ -46,12 +62,73 @@ const NoteInput = ({ addNote, onCancel }: NoteInputProps) => {
           date: response.data.date,
         };
         addNote(newNote);
+        setNotes((prevNotes) => [...prevNotes, newNote]);
         setTitle("");
         setContent("");
+
+        setTimeout(async () => {
+          await handleGetTodos();
+        }, 1000);
       }
     } catch (error) {
       console.error("To-do 생성 실패", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
+      }
     }
+  };
+
+  const handleGetTodos = async () => {
+    if (!userId || !date) {
+      console.error("User ID or date is missing");
+      return;
+    }
+
+    const [month, day] = date.split("-");
+    console.log("Date parameters:", { month, day });
+
+    const url = `${
+      import.meta.env.VITE_BASE_URL
+    }/api/todos/${userId}?month=${month}&day=${day}`;
+    console.log("GET API request URL:", url);
+
+    try {
+      const response = await axios.get<TodoResponse[]>(url);
+      console.log("GET Full API response:", response);
+      console.log("Response data type:", typeof response.data);
+      console.log(
+        "Response data length:",
+        Array.isArray(response.data) ? response.data.length : "Not an array"
+      );
+
+      if (response.status === 200) {
+        console.log("GET API response data:", response.data);
+        if (Array.isArray(response.data) && response.data.length === 0) {
+          console.log("No todos found for this date");
+          setNotes([]);
+        } else {
+          const fetchedNotes: NoteType[] = response.data.map((todo) => ({
+            id: todo.todo_id.toString(),
+            title: "",
+            content: todo.content,
+            createdAt: new Date(todo.date),
+            updatedAt: new Date(todo.date),
+            bookmarked: false,
+            date: todo.date,
+            isChecked: todo.is_checked,
+            emoji: todo.emoji,
+          }));
+          console.log("Fetched notes:", fetchedNotes);
+          setNotes(fetchedNotes);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch todos", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
+      }
+    }
+    onCancel();
   };
 
   return (
@@ -71,7 +148,7 @@ const NoteInput = ({ addNote, onCancel }: NoteInputProps) => {
       />
       <ButtonWrapper>
         <Button type="submit">일정 생성</Button>
-        <CancelButton type="button" onClick={onCancel}>
+        <CancelButton type="button" onClick={handleGetTodos}>
           리스트
         </CancelButton>
       </ButtonWrapper>

@@ -23,6 +23,7 @@ function Home() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { date } = useParams<{ date: string }>();
   const navigate = useNavigate();
+  const [notes, setNotes] = useState<NoteType[]>([]);
 
   if (!date) {
     navigate("/");
@@ -68,10 +69,11 @@ function Home() {
             <NoteInput
               addNote={handleAddNote}
               onCancel={() => setShowNoteInput(false)}
+              setNotes={setNotes}
             />
           ) : (
             <NoteList
-              notes={filteredNotes}
+              notes={notes.length > 0 ? notes : filteredNotes}
               onEditNote={(id, newTitle, newContent) =>
                 editNote(date, id, newTitle, newContent)
               }
@@ -112,6 +114,7 @@ const HomeContainer = styled.div`
   padding: 2rem;
   position: relative;
 `;
+
 const HomeHeader = styled.div`
   display: flex;
   justify-content: center;
