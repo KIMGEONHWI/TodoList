@@ -10,15 +10,11 @@ export const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path: "/Date/:uerId",
+    path: "/Date/:userId",
     element: <Date />,
   },
   {
-    path: "/Home/:userId",
-    element: <Home />,
-  },
-  {
-    path: "/Home/:date",
+    path: "/Home/:userId/:date",
     element: <Home />,
   },
   {
