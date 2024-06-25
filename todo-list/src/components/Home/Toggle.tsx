@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 
 interface ToggleBtnProps {
-  toggled: boolean;
+  toggled: string;
 }
 
 function Toggle({ toggleTheme }: { toggleTheme: () => void }) {
@@ -14,7 +14,7 @@ function Toggle({ toggleTheme }: { toggleTheme: () => void }) {
   };
 
   return (
-    <ToggleBtn onClick={handleToggle} toggled={isToggled}>
+    <ToggleBtn onClick={handleToggle} toggled={isToggled.toString()}>
       {isToggled ? "ON" : "OFF"}
     </ToggleBtn>
   );
@@ -31,7 +31,7 @@ const ToggleBtn = styled.button<ToggleBtnProps>`
   width: 7rem;
   height: 4rem;
   background-color: ${(props) =>
-    props.toggled ? props.theme.toggleBackground : "gray"};
+    props.toggled === "true" ? props.theme.toggleBackground : "gray"};
   color: white;
   border: none;
   border-radius: 3rem;

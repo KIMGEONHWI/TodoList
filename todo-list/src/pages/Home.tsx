@@ -17,15 +17,17 @@ function Home() {
     editNote,
     deleteNote,
     toggleBookmark,
+    toggleCheck,
+    changeEmoji,
     handleSortChange,
   } = useNotes();
   const [showNoteInput, setShowNoteInput] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { date } = useParams<{ date: string }>();
+  const { date, userId } = useParams<{ date: string; userId: string }>();
   const navigate = useNavigate();
   const [notes, setNotes] = useState<NoteType[]>([]);
 
-  if (!date) {
+  if (!date || !userId) {
     navigate("/");
     return null;
   }
@@ -38,6 +40,28 @@ function Home() {
     };
     addNote(newNote);
     setShowNoteInput(false);
+  };
+
+  const handleEditNote = (
+    id: string,
+    newTitle: string,
+    newContent: string,
+    newEmoji: string,
+    newChecked: boolean
+  ) => {
+    editNote(userId, date, id, newTitle, newContent, newEmoji, newChecked);
+  };
+
+  const handleDeleteNote = (id: string) => {
+    deleteNote(userId, date, id);
+  };
+
+  const handleToggleCheck = (id: string) => {
+    toggleCheck(date, id);
+  };
+
+  const handleChangeEmoji = (id: string, newEmoji: string) => {
+    changeEmoji(date, id, newEmoji);
   };
 
   const toggleTheme = () => {
@@ -74,11 +98,13 @@ function Home() {
           ) : (
             <NoteList
               notes={notes.length > 0 ? notes : filteredNotes}
-              onEditNote={(id, newTitle, newContent) =>
-                editNote(date, id, newTitle, newContent)
-              }
-              onDeleteNote={(id) => deleteNote(date, id)}
+              userId={userId}
+              date={date}
+              onEditNote={handleEditNote}
+              onDeleteNote={handleDeleteNote}
               onToggleBookmark={(id) => toggleBookmark(date, id)}
+              onToggleCheck={handleToggleCheck}
+              onEmojiChange={handleChangeEmoji} // 추가된 부분
               onAddNewNote={() => setShowNoteInput(true)}
             />
           )}

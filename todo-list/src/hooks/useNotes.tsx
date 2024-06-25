@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export interface NoteType {
   id: string;
@@ -8,6 +9,8 @@ export interface NoteType {
   updatedAt: Date;
   bookmarked: boolean;
   date: string;
+  checked: boolean;
+  emoji: string; // 추가된 부분
 }
 
 export const useNotes = () => {
@@ -44,36 +47,89 @@ export const useNotes = () => {
     saveNotesToLocalStorage(newNotes);
   };
 
-  const editNote = (
+  const editNote = async (
+    user_id: string,
     date: string,
-    id: string,
+    todo_id: string,
     newTitle: string,
-    newContent: string
+    newContent: string,
+    newEmoji: string,
+    newChecked: boolean
   ) => {
-    const updatedNotes = {
-      ...notes,
-      [date]: notes[date].map((note) =>
-        note.id === id
-          ? {
-              ...note,
-              title: newTitle,
-              content: newContent,
-              updatedAt: new Date(),
-            }
-          : note
-      ),
-    };
-    setNotes(updatedNotes);
-    saveNotesToLocalStorage(updatedNotes);
+    const url = `${import.meta.env.VITE_BASE_URL}/api/todos/${user_id}`;
+    console.log("URL:", url);
+    console.log("Request Data:", {
+      content: newContent,
+      date: new Date().toISOString(),
+      emoji: newEmoji,
+      is_checked: newChecked,
+    });
+
+    try {
+      const response = await axios.post(url, {
+        content: newContent,
+        date: new Date().toISOString(),
+        emoji: newEmoji,
+        is_checked: newChecked,
+      });
+
+      if (response.status === 200) {
+        console.log("투두 수정 성공:", response.data);
+
+        const updatedNotes = {
+          ...notes,
+          [date]: notes[date].map((note) =>
+            note.id === todo_id
+              ? {
+                  ...note,
+                  title: newTitle,
+                  content: newContent,
+                  emoji: newEmoji,
+                  checked: newChecked,
+                  updatedAt: new Date(),
+                }
+              : note
+          ),
+        };
+        setNotes(updatedNotes);
+        saveNotesToLocalStorage(updatedNotes);
+      } else {
+        console.error("투두 수정 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("투두 수정 중 오류 발생:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
+      }
+    }
   };
 
-  const deleteNote = (date: string, id: string) => {
-    const updatedNotes = {
-      ...notes,
-      [date]: notes[date].filter((note) => note.id !== id),
-    };
-    setNotes(updatedNotes);
-    saveNotesToLocalStorage(updatedNotes);
+  const deleteNote = async (user_id: string, date: string, todo_id: string) => {
+    const url = `${
+      import.meta.env.VITE_BASE_URL
+    }/api/todos/${user_id}/${todo_id}`;
+    console.log("DELETE API request URL:", url);
+
+    try {
+      const response = await axios.delete(url);
+
+      if (response.status === 204) {
+        console.log("투두 삭제 성공");
+        const updatedNotes = {
+          ...notes,
+          [date]: notes[date].filter((note) => note.id !== todo_id),
+        };
+        setNotes(updatedNotes);
+        saveNotesToLocalStorage(updatedNotes);
+      } else {
+        console.error("투두 삭제 실패:", response.status);
+      }
+    } catch (error) {
+      console.error("투두 삭제 중 오류 발생:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data);
+      }
+    }
   };
 
   const toggleBookmark = (date: string, id: string) => {
@@ -81,6 +137,28 @@ export const useNotes = () => {
       ...notes,
       [date]: notes[date].map((note) =>
         note.id === id ? { ...note, bookmarked: !note.bookmarked } : note
+      ),
+    };
+    setNotes(updatedNotes);
+    saveNotesToLocalStorage(updatedNotes);
+  };
+
+  const toggleCheck = (date: string, id: string) => {
+    const updatedNotes = {
+      ...notes,
+      [date]: notes[date].map((note) =>
+        note.id === id ? { ...note, checked: !note.checked } : note
+      ),
+    };
+    setNotes(updatedNotes);
+    saveNotesToLocalStorage(updatedNotes);
+  };
+
+  const changeEmoji = (date: string, id: string, newEmoji: string) => {
+    const updatedNotes = {
+      ...notes,
+      [date]: notes[date].map((note) =>
+        note.id === id ? { ...note, emoji: newEmoji } : note
       ),
     };
     setNotes(updatedNotes);
@@ -113,6 +191,8 @@ export const useNotes = () => {
     editNote,
     deleteNote,
     toggleBookmark,
+    toggleCheck,
+    changeEmoji,
     handleSortChange,
   };
 };

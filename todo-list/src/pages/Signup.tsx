@@ -45,8 +45,21 @@ function SignUp() {
         navigate("/");
       }
     } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.message);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+          console.error("Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("Request data:", error.request);
+        } else {
+          console.error("Error message:", error.message);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
       alert("회원가입에 실패했습니다. 다시 시도해주세요.");
-      console.error("There was an error!", error);
     }
   };
 

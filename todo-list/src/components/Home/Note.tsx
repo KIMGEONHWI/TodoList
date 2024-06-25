@@ -6,25 +6,39 @@ interface NoteProps {
   title: string;
   content: string;
   bookmarked: boolean;
-  onEdit: (newTitle: string, newContent: string) => void;
+  checked: boolean;
+  emoji: string;
+  onEdit: (
+    newTitle: string,
+    newContent: string,
+    newEmoji: string,
+    newChecked: boolean
+  ) => void;
   onDelete: () => void;
   onToggleBookmark: () => void;
+  onToggleCheck: () => void;
+  onEmojiChange: (newEmoji: string) => void; // 추가된 부분
 }
 
 const Note = ({
   title,
   content,
   bookmarked,
+  checked,
+  emoji,
   onEdit,
   onDelete,
   onToggleBookmark,
+  onToggleCheck,
+  onEmojiChange,
 }: NoteProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [newTitle, setNewTitle] = useState(title);
   const [newContent, setNewContent] = useState(content);
+  const [newEmoji, setNewEmoji] = useState(emoji);
+  const [newChecked, setNewChecked] = useState(checked);
 
   const handleSave = () => {
-    onEdit(newTitle, newContent);
+    onEdit(title, newContent, newEmoji, newChecked);
     setIsEditing(false);
   };
 
@@ -32,15 +46,26 @@ const Note = ({
     <NoteCard>
       {isEditing ? (
         <>
-          <Input
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
           <Textarea
             value={newContent}
             onChange={(e) => setNewContent(e.target.value)}
           />
+          <CheckboxContainer>
+            <Checkbox
+              type="checkbox"
+              checked={newChecked}
+              onChange={() => setNewChecked(!newChecked)}
+            />
+            <EmojiInput
+              type="text"
+              value={newEmoji}
+              onChange={(e) => {
+                setNewEmoji(e.target.value);
+                onEmojiChange(e.target.value);
+              }}
+              placeholder="Add emoji"
+            />
+          </CheckboxContainer>
           <ButtonGroup>
             <Button onClick={handleSave}>Save</Button>
             <Button onClick={() => setIsEditing(false)}>Cancel</Button>
@@ -48,12 +73,25 @@ const Note = ({
         </>
       ) : (
         <>
-          <NoteTitle>{title}</NoteTitle>
+          <Header>
+            <NoteTitle>{title}</NoteTitle>
+          </Header>
           <NoteContent>{content}</NoteContent>
+          <CheckboxContainer>
+            <Checkbox
+              type="checkbox"
+              checked={checked}
+              onChange={onToggleCheck}
+            />
+            <Emoji>{emoji}</Emoji>
+          </CheckboxContainer>
           <ButtonGroup>
             <Button onClick={() => setIsEditing(true)}>Edit</Button>
             <Button onClick={onDelete}>Delete</Button>
-            <BookmarkButton onClick={onToggleBookmark} bookmarked={bookmarked}>
+            <BookmarkButton
+              onClick={onToggleBookmark}
+              bookmarked={bookmarked.toString()}
+            >
               {bookmarked ? <FaBookmark /> : <FaRegBookmark />}
             </BookmarkButton>
           </ButtonGroup>
@@ -73,25 +111,21 @@ const NoteCard = styled.div`
   background-color: #fff;
 `;
 
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
 const NoteTitle = styled.h3`
   margin-bottom: 0.3rem;
-  font-size: 2.5rem;
-  color: red;
+  font-size: 1.5rem;
 `;
 
 const NoteContent = styled.p`
-  font-size: 3rem;
-  color: blue;
+  font-size: 1rem;
+  color: #333;
   margin-bottom: 0.3rem;
-`;
-
-const Input = styled.input`
-  padding: 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 1rem;
-  border: 1px solid #ccc;
-  width: 100%;
-  height: 3rem;
 `;
 
 const Textarea = styled.textarea`
@@ -101,6 +135,25 @@ const Textarea = styled.textarea`
   border: 1px solid #ccc;
   width: 100%;
   height: 6rem;
+`;
+
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+`;
+
+const Checkbox = styled.input`
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+`;
+
+const EmojiInput = styled.input`
+  padding: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid #ccc;
+  width: 100%;
 `;
 
 const ButtonGroup = styled.div`
@@ -126,15 +179,21 @@ const Button = styled.button`
   }
 `;
 
-const BookmarkButton = styled(Button)<{ bookmarked: boolean }>`
-  background-color: ${({ bookmarked }) => (bookmarked ? "gray" : "lightgray")};
+const BookmarkButton = styled(Button)<{ bookmarked: string }>`
+  background-color: ${({ bookmarked }) =>
+    bookmarked === "true" ? "gray" : "lightgray"};
 
   &:hover {
-    background-color: ${({ bookmarked }) => (bookmarked ? "darkgray" : "gray")};
+    background-color: ${({ bookmarked }) =>
+      bookmarked === "true" ? "darkgray" : "gray"};
   }
 
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+`;
+
+const Emoji = styled.span`
+  font-size: 2rem;
 `;

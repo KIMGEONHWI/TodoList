@@ -22,6 +22,7 @@ interface TodoResponse {
 const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [emoji, setEmoji] = useState(""); // 추가된 부분
   const { userId, date } = useParams<{ userId: string; date: string }>();
 
   console.log("Base URL:", import.meta.env.VITE_BASE_URL);
@@ -41,12 +42,13 @@ const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
 
     const url = `${import.meta.env.VITE_BASE_URL}/api/todos/${userId}`;
     console.log("Sending POST request to:", url);
-    console.log("Request data:", { date: formattedDate, content });
+    console.log("Request data:", { date: formattedDate, content, emoji }); // 수정된 부분
 
     try {
       const response = await axios.post<TodoResponse>(url, {
         date: formattedDate,
         content: content,
+        emoji: emoji,
       });
 
       console.log("POST Response data:", response.data);
@@ -60,11 +62,14 @@ const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
           updatedAt: new Date(response.data.date),
           bookmarked: false,
           date: response.data.date,
+          checked: response.data.is_checked,
+          emoji: response.data.emoji,
         };
         addNote(newNote);
         setNotes((prevNotes) => [...prevNotes, newNote]);
         setTitle("");
         setContent("");
+        setEmoji("");
 
         setTimeout(async () => {
           await handleGetTodos();
@@ -115,8 +120,8 @@ const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
             updatedAt: new Date(todo.date),
             bookmarked: false,
             date: todo.date,
-            isChecked: todo.is_checked,
-            emoji: todo.emoji,
+            checked: todo.is_checked,
+            emoji: todo.emoji, // 추가된 부분
           }));
           console.log("Fetched notes:", fetchedNotes);
           setNotes(fetchedNotes);
@@ -133,13 +138,6 @@ const NoteInput = ({ addNote, onCancel, setNotes }: NoteInputProps) => {
 
   return (
     <Form onSubmit={handleSubmit}>
-      <Input
-        type="text"
-        placeholder="제목"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-      />
       <Textarea
         placeholder="내용"
         value={content}
@@ -164,13 +162,6 @@ const Form = styled.form`
   width: 100%;
   height: 100%;
   padding-top: 7rem;
-`;
-
-const Input = styled.input`
-  padding: 2rem;
-  margin-bottom: 1rem;
-  border-radius: 1rem;
-  border: 1px solid #ccc;
 `;
 
 const Textarea = styled.textarea`
