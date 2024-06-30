@@ -26,7 +26,7 @@ interface NoteListProps {
   onDeleteNote: (userId: string, date: string, id: string) => void;
   onToggleBookmark: (id: string) => void;
   onToggleCheck: (id: string) => void;
-  onEmojiChange: (id: string, newEmoji: string) => void; // 추가된 부분
+  onEmojiChange: (id: string, newEmoji: string) => void;
   onAddNewNote: () => void;
 }
 

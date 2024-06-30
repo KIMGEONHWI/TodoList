@@ -10,7 +10,7 @@ export interface NoteType {
   bookmarked: boolean;
   date: string;
   checked: boolean;
-  emoji: string; // 추가된 부분
+  emoji: string;
 }
 
 export const useNotes = () => {

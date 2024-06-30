@@ -104,7 +104,7 @@ function Home() {
               onDeleteNote={handleDeleteNote}
               onToggleBookmark={(id) => toggleBookmark(date, id)}
               onToggleCheck={handleToggleCheck}
-              onEmojiChange={handleChangeEmoji} // 추가된 부분
+              onEmojiChange={handleChangeEmoji}
               onAddNewNote={() => setShowNoteInput(true)}
             />
           )}

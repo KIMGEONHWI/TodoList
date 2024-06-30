@@ -17,7 +17,7 @@ interface NoteProps {
   onDelete: () => void;
   onToggleBookmark: () => void;
   onToggleCheck: () => void;
-  onEmojiChange: (newEmoji: string) => void; // 추가된 부분
+  onEmojiChange: (newEmoji: string) => void;
 }
 
 const Note = ({
